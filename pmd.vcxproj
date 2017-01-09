@@ -14,11 +14,15 @@
     <ClInclude Include="inc\dungeon\dungeon.h" />
     <ClInclude Include="inc\dungeon\dungeon_template.h" />
     <ClInclude Include="inc\dungeon\floor.h" />
+    <ClInclude Include="inc\sprite\color.h" />
+    <ClInclude Include="inc\sprite\color_util.h" />
+    <ClInclude Include="inc\sprite\randomizer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pmd.cc" />
     <ClCompile Include="src\dungeon\dungeon.cc" />
     <ClCompile Include="src\dungeon\floor.cc" />
+    <ClCompile Include="src\sprite\randomizer.cc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{2BEA570C-A8AD-4A9F-94A0-16FEDA598D22}</ProjectGuid>
@@ -48,19 +52,21 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(ProjectDir)\lib\SDL-1.2.15\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\lib\SDL-1.2.15\lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\Warren\Desktop\pmd\pmd\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
-      <SubSystem>NotSet</SubSystem>
+      <AdditionalDependencies>SDL.lib;SDLmain.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
