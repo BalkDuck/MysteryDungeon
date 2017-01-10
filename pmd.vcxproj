@@ -14,7 +14,6 @@
     <ClInclude Include="inc\dungeon\dungeon.h" />
     <ClInclude Include="inc\dungeon\dungeon_template.h" />
     <ClInclude Include="inc\dungeon\floor.h" />
-    <ClInclude Include="inc\sprite\color.h" />
     <ClInclude Include="inc\sprite\color_util.h" />
     <ClInclude Include="inc\sprite\randomizer.h" />
   </ItemGroup>
