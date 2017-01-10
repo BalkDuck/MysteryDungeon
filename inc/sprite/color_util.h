@@ -1,124 +1,59 @@
 #ifndef COLOR_UTIL_H
 #define COLOR_UTIL_H
 
-#include "color.h"
+#include <SDL.h>
+
+static int LIMIT(int x, int min, int max) {
+	if (x > max) x = max;
+	if (x < min) x = min;
+	return x;
+}
+
+static double ANGLE(double angle) {
+	while (angle >= 360)	angle -= 360;
+	while (angle < 0)		angle += 360;
+	return angle;
+}
+
+static int MIN(int a, int b) {
+	return (a <= b ? a : b);
+}
+
+static int MIN(int a, int b, int c) {
+	return MIN(a, MIN(b, c));
+}
+
+static int MAX(int a, int b) {
+	return (a > b ? a : b);
+}
+
+static int MAX(int a, int b, int c) {
+	return MAX(a, MAX(b, c));
+}
+
+static int MID(int a, int b, int c) {
+	if (a == b) return a;
+	if (b == c) return b;
+	if (c == a) return c;
+	int min = MIN(a, b, c);
+	int max = MAX(a, b, c);
+	if (a > min && a < max) return a;
+	if (b > min && b < max) return b;
+	return c;
+}
+
+struct RGB {
+	int r;
+	int g;
+	int b;
+};
 
 static RGB Uint32toRGB(Uint32 in) {
 	RGB out;
-	out.r = (in >> 16) & 0xff;
-	out.g = (in >> 8) & 0xff;
-	out.b = in & 0xff;
+	out.r = (in >> 16) & 0xFF;
+	out.g = (in >> 8) & 0xFF;
+	out.b = in & 0xFF;
 	return out;
-}
-
-static RGB HSVtoRGB(HSV in) {
-	RGB out;
-
-	if (in.s == 0 && in.v == 0) {
-		out.r = 0; out.g = 0; out.b = 0;
-		return out;
-	}
-
-	double hh = in.h / 60;
-	long i = (long)hh;
-	double ff = hh - i;
-	double p = in.v * (1 - in.s);
-	double q = in.v * (1 - in.s * ff);
-	double t = in.v * (1 - in.s * (1 - ff));
-
-	switch (i) {
-	case 0:
-		out.r = in.v;
-		out.g = t;
-		out.b = p;
-		break;
-	case 1:
-		out.r = q;
-		out.g = in.v;
-		out.b = p;
-		break;
-	case 2:
-		out.r = p;
-		out.g = in.v;
-		out.b = t;
-		break;
-
-	case 3:
-		out.r = p;
-		out.g = q;
-		out.b = in.v;
-		break;
-	case 4:
-		out.r = t;
-		out.g = p;
-		out.b = in.v;
-		break;
-	default:
-		out.r = in.v;
-		out.g = p;
-		out.b = q;
-		break;
-	}
-
-	return out;
-}
-
-static HSV RGBtoHSV(RGB in) {
-	HSV out;
-
-	double min;
-	min = in.r < in.g ? in.r : in.g;
-	min = min  < in.b ? min : in.b;
-
-	double max;
-	max = in.r > in.g ? in.r : in.g;
-	max = max  > in.b ? max : in.b;
-	out.v = max;
-
-	double d = max - min;
-
-	if (d < 0) {
-		out.h = 0; out.s = 0; out.v = 0;
-		return out;
-	}
-
-	if (max == 0) {
-		out.h = 0; out.s = 0; out.v = 0;
-		return out;
-	}
-
-	out.s = d / max;
-
-	if (d > 0) {
-		if (max == in.r) {
-			out.h = (in.g - in.b) / d;
-		}
-		if (max == in.g) {
-			out.h = 2 + (in.b - in.r) / d;
-		}
-		if (max == in.b) {
-			out.h = 4 + (in.r - in.g) / d;
-		}
-	}
-	else {
-		out.h = 0;
-	}
-
-	out.h *= 60;
-
-	while (out.h >= 360) {
-		out.h -= 360;
-	}
-	while (out.h < 0) {
-		out.h += 360;
-	}
-
-	return out;
-}
-
-static HSV Uint32toHSV(Uint32 in) {
-	RGB rgb = Uint32toRGB(in);
-	return RGBtoHSV(rgb);
 }
 
 static Uint32 RGBtoUint32(RGB in) {
@@ -129,19 +64,136 @@ static Uint32 RGBtoUint32(RGB in) {
 	return out;
 }
 
-static Uint32 HSVtoUint32(HSV in) {
-	RGB rgb = HSVtoRGB(in);
-	return RGBtoUint32(rgb);
+#define MOD_R 0
+#define MOD_G 1
+#define MOD_B 2
+
+/**
+ * Modifies a single RGB value, and determines if there is
+ * any remainder that needs to be used to modify other values
+ */
+static RGB* ModRGBValue(RGB* in, int mod, int which_value) {
+	if (!mod) return in;
+
+	int min = MIN(in->r, in->g, in->b);
+	int max = MAX(in->r, in->g, in->b);
+
+	int prev_value;
+	switch (which_value) {
+	case MOD_R:
+		prev_value = in->r;
+		in->r += mod;
+		if (in->r >= max) {
+			in->r = max;
+			mod -= max - prev_value;
+			if (in->g == max) {
+				return ModRGBValue(in, -mod, MOD_G);
+			}
+			else {
+				return ModRGBValue(in, -mod, MOD_B);
+			}
+		}
+		else if (in->r <= min) {
+			in->r = min;
+			mod += prev_value - min;
+			if (in->g == min) {
+				return ModRGBValue(in, -mod, MOD_G);
+			}
+			else {
+				return ModRGBValue(in, -mod, MOD_B);
+			}
+		}
+		break;
+
+	case MOD_G:
+		prev_value = in->g;
+		in->g += mod;
+		if (in->g >= max) {
+			in->g = max;
+			mod -= max - prev_value;
+			if (in->r == max) {
+				return ModRGBValue(in, -mod, MOD_R);
+			}
+			else {
+				return ModRGBValue(in, -mod, MOD_B);
+			}
+		}
+		else if (in->g <= min) {
+			in->g = min;
+			mod += prev_value - min;
+			if (in->r == min) {
+				return ModRGBValue(in, -mod, MOD_R);
+			}
+			else {
+				return ModRGBValue(in, -mod, MOD_B);
+			}
+		}
+		break;
+
+	case MOD_B:
+		prev_value = in->b;
+		in->b += mod;
+		if (in->b >= max) {
+			in->b = max;
+			mod -= max - prev_value;
+			if (in->r == max) {
+				return ModRGBValue(in, -mod, MOD_R);
+			}
+			else {
+				return ModRGBValue(in, -mod, MOD_G);
+			}
+		}
+		else if (in->b <= min) {
+			in->b = min;
+			mod += prev_value - min;
+			if (in->r == min) {
+				return ModRGBValue(in, -mod, MOD_R);
+			}
+			else {
+				return ModRGBValue(in, -mod, MOD_G);
+			}
+		}
+		break;
+	}
+
+	return in;
 }
 
-static Color BuildColor(Uint32 in) {
-	/** Create a Color object from a Uint32 value taken from a bitmap */
-	Color out = {
-		Uint32toRGB(in),
-		Uint32toHSV(in),
-		in,
-	};
-	return out;
+/**
+ * Takes in an RGB pointer and a hue value
+ * Hue is treated as an angle: passing multiples of 360 
+ * will get the same RGB value in return
+ */
+static RGB* ModRGBHue(RGB* in, int hue) {
+	int min = MIN(in->r, in->g, in->b);
+	int max = MAX(in->r, in->g, in->b);
+	if (min == max) return in;
+	int mod = hue * (max - min) * 6 / 360;
+	
+	int mid = MID(in->r, in->g, in->b);
+	if (mid == max || mid == min) {
+		if (in->r == in->g) {
+			return ModRGBValue(in, mod, MOD_R);
+		}
+		else if (in->g == in->b) {
+			return ModRGBValue(in, mod, MOD_G);
+		}
+		else {
+			return ModRGBValue(in, mod, MOD_B);
+		}
+	}
+
+	if (in->r == mid) {
+		return ModRGBValue(in, mod, MOD_R);
+	}
+	else if (in->g == mid) {
+		return ModRGBValue(in, mod, MOD_G);
+	}
+	else {
+		return ModRGBValue(in, mod, MOD_B);
+	}
+
+	return in;
 }
 
 #endif
