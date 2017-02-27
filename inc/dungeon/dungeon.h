@@ -1,21 +1,30 @@
 #ifndef DUNGEON_H
 #define DUNGEON_H
 
-#include "dungeon\dungeon_template.h"
+#include "config\config.h"
 #include "dungeon\floor.h"
-#include <iostream>
 
-struct Dungeon {
-	DungeonTemplate dungeon_template;
-	int seed;
-	int* floor_seeds;
-	int floor_count;
-	int current_floor;
-	Floor floor;
+typedef enum
+{
+	MagmaCavern,
+	TinyWoods,
+} DungeonName;
+
+static std::string dungeon_name_table[] =
+{
+	"MagmaCavern",
+	"TinyWoods",
 };
 
-Dungeon* GenerateDungeon(int, int);
-
-int GoToNextFloor(Dungeon*);
+struct Dungeon
+{
+	int name;
+	int seed;
+	int difficulty;
+	int* floor_seeds;
+	int total_floors;
+	int floor_counter;
+	Floor* floor;
+};
 
 #endif

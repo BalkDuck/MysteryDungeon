@@ -3,7 +3,9 @@
 
 #include "color_util.h"
 
-#include <iostream>
+#define BUCKET_SIZE 100
+
+#define WEIGHT 50
 
 struct ColorBucketItem {
 	Uint32 color;
@@ -28,6 +30,8 @@ static int colors_to_skip[] = {
 	0xFFFFFF, // White
 	0x000000, // Black
 };
+
+Uint32 GetColor(SDL_Surface* surface, int x, int y);
 
 /**
  * Returns a slightly-randomized bitmap

@@ -123,7 +123,6 @@ void FillBucket(SDL_Surface* surface, ColorBucket* bucket) {
 }
 
 SDL_Surface* RandomizeSurface(SDL_Surface* surface, int seed, int bucket_size, int weight) {
-	std::cout << "Seed: " << seed << std::endl;
 	srand(seed);
 	
 	/** Create buckets */
@@ -138,7 +137,6 @@ SDL_Surface* RandomizeSurface(SDL_Surface* surface, int seed, int bucket_size, i
 				bucket->tail = item;
 				bucket->bucket_size = bucket_size;
 				bucket->weight = rand() % weight - weight;
-				std::cout << bucket->weight << std::endl;
 				FillBucket(surface, bucket);
 				if (buckets->tail == nullptr) {
 					buckets->head = bucket;
